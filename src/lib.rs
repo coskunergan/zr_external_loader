@@ -39,6 +39,10 @@ static GREEN_LED_PIN: GlobalPin = GlobalPin::new();
 static COUNTER: AtomicU16 = AtomicU16::new(0);
 static REGISTER: AtomicU16 = AtomicU16::new(0);
 
+extern "C" {
+    fn ext_flash_loader_start(timeout_sec: u32) -> i32;
+}
+
 //====================================================================================
 //====================================================================================
 #[embassy_executor::task]
@@ -62,7 +66,7 @@ async fn led_task(spawner: Spawner) {
     );
 
     loop {
-        let _ = Timer::after(Duration::from_millis(1000)).await;
+        let _ = Timer::after(Duration::from_millis(500)).await;
         red_led_pin.toggle();
         green_led_pin.toggle();
         log::info!("Endless Loop!");
@@ -106,16 +110,20 @@ extern "C" fn rust_main() {
     let mut can_fd = CanBus::new("canbus0\0");
     can_fd.set_data_callback(receive_callback);
 
-    let modbus = ModbusSlave::new("modbus0\0");
-    let modbus_vcp = ModbusSlave::new("modbus1\0");
+    // let modbus = ModbusSlave::new("modbus0\0");
+    // let modbus_vcp = ModbusSlave::new("modbus1\0");
 
-    modbus.mb_add_holding_reg(COUNTER.as_ptr(), 0);
-    modbus.mb_add_holding_reg(REGISTER.as_ptr(), 1);
-    modbus.mb_add_holding_reg(&mut local_reg, 2);
+    // modbus.mb_add_holding_reg(COUNTER.as_ptr(), 0);
+    // modbus.mb_add_holding_reg(REGISTER.as_ptr(), 1);
+    // modbus.mb_add_holding_reg(&mut local_reg, 2);
 
-    modbus_vcp.mb_add_holding_reg(COUNTER.as_ptr(), 0);
-    modbus_vcp.mb_add_holding_reg(REGISTER.as_ptr(), 1);
-    modbus_vcp.mb_add_holding_reg(&mut local_reg, 2);
+    // modbus_vcp.mb_add_holding_reg(COUNTER.as_ptr(), 0);
+    // modbus_vcp.mb_add_holding_reg(REGISTER.as_ptr(), 1);
+    // modbus_vcp.mb_add_holding_reg(&mut local_reg, 2);
+
+    unsafe {
+        ext_flash_loader_start(23);
+    }
 
     RED_LED_PIN.init(Pin::new(
         zephyr::devicetree::labels::my_red_led::get_instance().expect("my_red_led not found!"),

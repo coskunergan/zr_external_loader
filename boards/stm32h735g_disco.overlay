@@ -1,5 +1,13 @@
 
 / {
+	chosen {
+		zephyr,console = &usart1;
+		zephyr,shell-uart = &usart1;		
+	};
+	aliases {
+        usart1 = &usart1;
+		usart3 = &usart3;
+    };
 	gpios {		
 		compatible = "gpio-leds";	
 		my_red_led: my_red_led {			
@@ -33,6 +41,7 @@
 	pinctrl-0 = <&usart3_tx_pd8 &usart3_rx_pd9>;
 	pinctrl-names = "default";
 	current-speed = <115200>;
+	parity = "even";
 	status = "okay";
 	modbus1 {
 		compatible = "zephyr,modbus-serial";
