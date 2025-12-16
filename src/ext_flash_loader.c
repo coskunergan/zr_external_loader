@@ -186,14 +186,14 @@ static int cmd_write_memory(void)
     }
 
     if(address < 0x90000000)
-    {
-        address -= 0x90000000;
-        LOG_ERR("Addres Data not fit.");
+    {        
+        LOG_ERR("Addres Data not fit. 0x90000000");
         send_nack();
         return -ETIMEDOUT;
     }
     else
     {
+        address -= 0x90000000;
         send_ack();
     }
 
@@ -272,14 +272,14 @@ static int cmd_read_memory(void)
     }
 
     if(address < 0x90000000)
-    {
-        address -= 0x90000000;
-        LOG_ERR("Addres Data not fit.");
+    {        
+        LOG_ERR("Addres Data not fit. 0x90000000");
         send_nack();
         return -ETIMEDOUT;
     }
     else
     {
+        address -= 0x90000000;
         send_ack();
     }
 
@@ -331,7 +331,7 @@ int ext_flash_loader_start(uint32_t timeout_sec)
     int ret;
 
     LOG_INF("========================================");
-    LOG_INF("External Flash Loader Started");
+    LOG_INF("External Flash Loader Started V1.0.0");
     LOG_INF("Protocol: AN2606 UART Bootloader");
     LOG_INF("Timeout: %u seconds", timeout_sec);
     LOG_INF("========================================");

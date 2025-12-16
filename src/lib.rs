@@ -107,8 +107,8 @@ extern "C" fn rust_main() {
 
     let mut local_reg = 0x123;
 
-    let mut can_fd = CanBus::new("canbus0\0");
-    can_fd.set_data_callback(receive_callback);
+    // let mut can_fd = CanBus::new("canbus0\0");
+    // can_fd.set_data_callback(receive_callback);
 
     // let modbus = ModbusSlave::new("modbus0\0");
     // let modbus_vcp = ModbusSlave::new("modbus1\0");
