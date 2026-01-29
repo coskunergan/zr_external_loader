@@ -1,0 +1,54 @@
+
+/ {
+	chosen {
+		zephyr,console = &usart1;
+		zephyr,shell-uart = &usart1;		
+	};
+	aliases {
+        usart1 = &usart6;
+		usart3 = &uart7;
+    };	
+	gpios {		
+		compatible = "gpio-leds";	
+		my_red_led: my_red_led {			
+			gpios = <&gpioc 2 GPIO_ACTIVE_LOW>;	
+			label = "RED LED LED2";
+		};
+		my_green_led: my_green_led {			
+			gpios = <&gpioi 1 GPIO_ACTIVE_LOW>;	
+			label = "GREEN LED LED1";
+		};		
+		button: button {
+			gpios = <&gpioi 11 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>;
+			label = "Button";
+		};											
+	};				
+};
+
+&uart7 {
+	pinctrl-0 = <&uart7_rx_pf6 &uart7_tx_pf7>;
+	pinctrl-names = "default";
+	current-speed = <11520>;
+	status = "okay";
+};
+
+&usart6 {
+	pinctrl-0 = <&usart6_tx_pc6 &usart6_rx_pc7>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	status = "okay";	
+};
+
+&n25q128a1 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		nor_part: partition@0 {
+			label = "nor";
+			reg = <0x0 0x400000>;
+		};		
+	};
+};
+
