@@ -12,14 +12,14 @@ use log::warn;
 
 pub struct Button {
     pin: GpioPin,
-    callback: Box<dyn Fn() + Send + Sync + 'static>,
+    callback: Box<dyn Fn(bool) + Send + Sync + 'static>,
     debounce: Duration,
 }
 
 impl Button {
     pub fn new(
         pin: GpioPin,
-        callback: Box<dyn Fn() + Send + Sync + 'static>,
+        callback: Box<dyn Fn(bool) + Send + Sync + 'static>,
         debounce: Duration,
     ) -> Self {
         Self {
@@ -29,12 +29,12 @@ impl Button {
         }
     }
     #[allow(dead_code)]
-    pub fn set_callback(&mut self, cb: Box<dyn Fn() + Send + Sync + 'static>) {
+    pub fn set_callback(&mut self, cb: Box<dyn Fn(bool) + Send + Sync + 'static>) {
         self.callback = cb;
     }
     #[allow(dead_code)]
-    pub fn trigger_callback(&self) {
-        (self.callback)();
+    pub fn trigger_callback(&self, state: bool) {
+        (self.callback)(state);
     }
 
     pub async fn work(&mut self) {
@@ -48,11 +48,13 @@ impl Button {
         loop {
             unsafe { self.pin.wait_for_high().await };
 
-            (self.callback)();
+            (self.callback)(true);
 
             Timer::after(self.debounce).await;
 
             unsafe { self.pin.wait_for_low().await };
+
+            (self.callback)(false);
 
             Timer::after(self.debounce).await;
         }

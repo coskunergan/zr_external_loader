@@ -5,8 +5,8 @@
 		zephyr,shell-uart = &usart1;		
 	};
 	aliases {
-        usart1 = &usart6;
-		usart3 = &uart7;
+        usart6 = &usart6;
+		uart7 = &uart7;
     };	
 	gpios {		
 		compatible = "gpio-leds";	
@@ -18,6 +18,14 @@
 			gpios = <&gpioi 1 GPIO_ACTIVE_LOW>;	
 			label = "GREEN LED LED1";
 		};		
+		boot0_pin: boot0_pin {			
+			gpios = <&gpioa 0 GPIO_ACTIVE_LOW>;	
+			label = "Targer Boot0 Pin";
+		};	
+		nrst_pin: nrst_pin {			
+			gpios = <&gpiog 3 GPIO_ACTIVE_LOW>;	
+			label = "Targer NRESET Pin";
+		};					
 		button: button {
 			gpios = <&gpioi 11 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>;
 			label = "Button";
@@ -28,7 +36,8 @@
 &uart7 {
 	pinctrl-0 = <&uart7_rx_pf6 &uart7_tx_pf7>;
 	pinctrl-names = "default";
-	current-speed = <11520>;
+	current-speed = <19200>;
+	parity = "even";
 	status = "okay";
 };
 
@@ -36,6 +45,7 @@
 	pinctrl-0 = <&usart6_tx_pc6 &usart6_rx_pc7>;
 	pinctrl-names = "default";
 	current-speed = <115200>;
+	parity = "even";
 	status = "okay";	
 };
 

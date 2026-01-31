@@ -1,12 +1,12 @@
 
 / {
 	chosen {
-		zephyr,console = &usart1;
-		zephyr,shell-uart = &usart1;		
+		zephyr,console = &usart3;
+		zephyr,shell-uart = &usart3;		
 	};
 	aliases {
-        usart1 = &usart1;
-		usart3 = &usart3;
+        usart-1 = &usart1;
+		usart-3 = &usart3;
     };
 	gpios {		
 		compatible = "gpio-leds";	
@@ -18,6 +18,14 @@
 			gpios = <&gpioc 3 GPIO_ACTIVE_LOW>;	
 			label = "GREEN LED LED1";
 		};		
+		boot0_pin: boot0_pin {			
+			gpios = <&gpioa 0 GPIO_ACTIVE_HIGH>;	
+			label = "Targer Boot0 Pin";
+		};	
+		nrst_pin: nrst_pin {			
+			gpios = <&gpiog 3 GPIO_ACTIVE_HIGH>;	
+			label = "Targer NRESET Pin";
+		};			
 		button: button {
 			gpios = <&gpioc 13 (GPIO_PULL_DOWN | GPIO_ACTIVE_LOW)>;
 			label = "Button";
@@ -28,13 +36,9 @@
 &usart1 {
 	pinctrl-0 = <&usart1_tx_pb14 &usart1_rx_pb15>;
 	pinctrl-names = "default";
-	current-speed = <115200>;
-	status = "okay";
-	modbus0 {
-		compatible = "zephyr,modbus-serial";
-		status = "okay";
-		de-gpios = <&gpioe 9 GPIO_ACTIVE_LOW>;	
-	};		
+	current-speed = <19200>;
+	parity = "even";
+	status = "okay";	
 };
 
 &usart3 {
@@ -42,29 +46,7 @@
 	pinctrl-names = "default";
 	current-speed = <115200>;
 	parity = "even";
-	status = "okay";
-	modbus1 {
-		compatible = "zephyr,modbus-serial";
-		status = "okay";
-		de-gpios = <&gpioe 0 GPIO_ACTIVE_LOW>;	
-	};		
-};
-
-&fdcan1 {
-    label = "canbus0"; 
-};
-
-&mx25lm51245 {
-	partitions {
-		compatible = "fixed-partitions";
-		#address-cells = <1>;
-		#size-cells = <1>;
-
-		nor_part: partition@0 {
-			label = "nor";
-			reg = <0x0 0x400000>;
-		};		
-	};
+	status = "okay";		
 };
 
 

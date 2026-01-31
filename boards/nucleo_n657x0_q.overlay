@@ -1,5 +1,9 @@
 
 / {
+	chosen {
+		zephyr,console = &usart3;
+		zephyr,shell-uart = &usart3;		
+	};	
 	gpios {		
 		compatible = "gpio-leds";	
 		my_red_led: my_red_led {			
@@ -36,7 +40,7 @@
 		 <&rcc STM32_SRC_CKPER USART1_SEL(1)>;
 	pinctrl-0 = <&usart1_tx_pe5 &usart1_rx_pe6>;
 	pinctrl-names = "default";
-	current-speed = <115200>;
+	current-speed = <19200>;
 	status = "okay";
 	modbus1 {
 		compatible = "zephyr,modbus-serial";
