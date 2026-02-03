@@ -8,7 +8,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "source ~/zephyrproject/.venv/bin/activate && source ~/.cargo/env && west build -p auto -d ${config:app.build_dir} -b ${config:bsp.board} ${config:app.name}"
+                "source ~/zephyrproject/.venv/bin/activate && source ~/.cargo/env && west build --sysbuild -p auto -d ${config:app.build_dir} -b ${config:bsp.board} ${config:app.name}"
             ],
             "problemMatcher": ["$gcc"]
         },

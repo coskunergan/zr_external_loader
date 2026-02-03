@@ -1,6 +1,8 @@
 
 / {
 	chosen {
+		zephyr,code-partition = &slot0_partition;	
+		zephyr,bootloader-partition = &boot_partition;
 		zephyr,console = &usart3;
 		zephyr,shell-uart = &usart3;		
 	};
@@ -49,4 +51,34 @@
 	status = "okay";		
 };
 
+&flash0 {
+    partitions {
+        compatible = "fixed-partitions";
+        #address-cells = <1>;
+        #size-cells = <1>;
 
+        /* Bootloader - 64KB (Offset 0) */
+        boot_partition: partition@0 {
+            label = "mcuboot";
+            reg = <0x00000000 0x00010000>;
+        };
+
+        /* Slot 0 - Uygulama Buraya Yüklenir (Offset 64KB) */
+        slot0_partition: partition@10000 {
+            label = "image-0";
+            reg = <0x00010000 0x00070000>; /* Boyutu ihtiyacınıza göre ayarlayın */
+        };
+
+        /* Slot 1 - Güncelleme Bekleme Alanı (Offset hesaplanmalı) */
+        slot1_partition: partition@80000 {
+            label = "image-1";
+            reg = <0x00080000 0x00070000>;
+        };
+
+        /* Scratch - Swap işlemi için */
+        scratch_partition: partition@f0000 {
+            label = "image-scratch";
+            reg = <0x000f0000 0x00010000>;
+        };
+    };
+};
