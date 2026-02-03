@@ -5,46 +5,48 @@
 	};
 };
 
-/* 1. DOĞRU ETİKET İLE TEMİZLİK */
-/* Verdiğin n25q128a1 etiketi ile çipe ulaşıp içindeki tanımları siliyoruz */
-&n25q128a1 {
+&mx25lm51245 {
 	/delete-node/ partitions;
 };
 
-/* 2. QSPI Donanımını Kapatıyoruz */
 &quadspi {
 	status = "disabled";
 };
 
-/* 3. Dahili Flash Üzerine Kurulum (Sector Hizalı) */
+/* Dahili Flash (Flash0) - 128KB Sektör Hizalaması */
 &flash0 {
 	partitions {
 		compatible = "fixed-partitions";
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		/* Sector 0-1 (32KB+32KB) -> Bootloader */
+		/* STM32H735 Sektör Boyutu: 128KB */
+		/* Bootloader F7'deki gibi 64KB OLAMAZ. 128KB (0x20000) olmak zorunda */
+		
 		boot_partition: partition@0 {
 			label = "mcuboot";
-			reg = <0x00000000 0x00010000>; 
+			reg = <0x00000000 0x00020000>; /* 128KB (1 Sektör) */
 		};
 
-		/* Sector 2-3-4 (32KB+32KB+128KB) -> Slot 0 (App) */
-		slot0_partition: partition@10000 {
+		/* Slot 0 - Uygulama */
+		slot0_partition: partition@20000 {
 			label = "image-0";
-			reg = <0x00010000 0x00030000>; 
+			reg = <0x00020000 0x00060000>; /* 384KB (3 Sektör) */
 		};
 
-		/* Sector 5 (256KB) -> Slot 1 (Update) */
-		slot1_partition: partition@40000 {
+		/* Slot 1 - Güncelleme (Dahili flasha sığdırmak için) */
+		/* H735G 1MB Flash'a sahiptir. Yer darlığı çekebilirsin.
+		   Eğer sığmıyorsa Slot1 harici flasha taşınmalı. 
+		   Şimdilik dahili örnek: */
+		slot1_partition: partition@80000 {
 			label = "image-1";
-			reg = <0x00040000 0x00040000>; 
+			reg = <0x00080000 0x00060000>; /* 384KB (3 Sektör) */
 		};
 
-		/* Sector 6 (256KB) -> Scratch (Swap için) */
-		scratch_partition: partition@80000 {
+		/* Scratch - 128KB */
+		scratch_partition: partition@e0000 {
 			label = "image-scratch";
-			reg = <0x00080000 0x00010000>; 
+			reg = <0x000e0000 0x00020000>; /* 128KB (1 Sektör) */
 		};
 	};
 };
