@@ -55,11 +55,7 @@
 
 &mx25lm51245 {
 	/delete-node/ partitions;
-};
-
-&mx25lm51245 {
-	status = "okay";
-	
+	status = "okay";	
 	partitions {
 		compatible = "fixed-partitions";
 		#address-cells = <1>;
@@ -67,18 +63,19 @@
 
 		slot2_partition: partition@0 {
 			label = "mcuboot-primary-1";
-			reg = <0x00000000 0x00020000>; 
+			reg = <0x00000000 0x00200000>;  // 2mb
 		};
 
-		slot3_partition: partition@20000 {
+		slot3_partition: partition@200000 {
 			label = "mcuboot-secondary-1";
-			reg = <0x00020000 0x00020000>;
+			reg = <0x00200000 0x00200000>;  // 2mb
 		};			
 	};
 };
 
 /* TÜM SLOTLAR DAHİLİ FLASH (ROM) İÇİNDE */
 &flash0 {
+	/delete-node/ partitions;	
 	partitions {
 		compatible = "fixed-partitions";
 		#address-cells = <1>;
