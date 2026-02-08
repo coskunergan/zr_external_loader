@@ -67,12 +67,12 @@
 
 		slot2_partition: partition@0 {
 			label = "mcuboot-primary-1";
-			reg = <0x00020000 0x00020000>; 
+			reg = <0x00000000 0x00020000>; 
 		};
 
-		slot3_partition: partition@40000 {
+		slot3_partition: partition@20000 {
 			label = "mcuboot-secondary-1";
-			reg = <0x00040000 0x00020000>;
+			reg = <0x00020000 0x00020000>;
 		};			
 	};
 };
