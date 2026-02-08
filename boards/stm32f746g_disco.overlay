@@ -38,7 +38,6 @@
 	pinctrl-0 = <&uart7_rx_pf6 &uart7_tx_pf7>;
 	pinctrl-names = "default";
 	current-speed = <19200>;
-	parity = "even";
 	status = "okay";
 };
 
@@ -46,7 +45,6 @@
 	pinctrl-0 = <&usart6_tx_pc6 &usart6_rx_pc7>;
 	pinctrl-names = "default";
 	current-speed = <115200>;
-	parity = "even";
 	status = "okay";	
 };
 

@@ -38,8 +38,7 @@
 &usart1 {
 	pinctrl-0 = <&usart1_tx_pb14 &usart1_rx_pb15>;
 	pinctrl-names = "default";
-	current-speed = <19200>;
-	parity = "even";
+	current-speed = <115200>;
 	status = "okay";	
 };
 
@@ -47,52 +46,68 @@
 	pinctrl-0 = <&usart3_tx_pd8 &usart3_rx_pd9>;
 	pinctrl-names = "default";
 	current-speed = <115200>;
-	parity = "even";
 	status = "okay";		
+};
+
+&octospi1 {
+	status = "okay";
 };
 
 &mx25lm51245 {
 	/delete-node/ partitions;
 };
 
-&quadspi {
-	status = "disabled";
+&mx25lm51245 {
+	status = "okay";
+	
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		slot2_partition: partition@0 {
+			label = "mcuboot-primary-1";
+			reg = <0x00020000 0x00020000>; 
+		};
+
+		slot3_partition: partition@40000 {
+			label = "mcuboot-secondary-1";
+			reg = <0x00040000 0x00020000>;
+		};			
+	};
 };
 
-/* Dahili Flash (Flash0) - 128KB Sektör Hizalaması */
+/* TÜM SLOTLAR DAHİLİ FLASH (ROM) İÇİNDE */
 &flash0 {
 	partitions {
 		compatible = "fixed-partitions";
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		/* STM32H735 Sektör Boyutu: 128KB */
-		/* Bootloader F7'deki gibi 64KB OLAMAZ. 128KB (0x20000) olmak zorunda */
-		
+		/* Sektör 0: Bootloader (128KB) */
 		boot_partition: partition@0 {
 			label = "mcuboot";
-			reg = <0x00000000 0x00020000>; /* 128KB (1 Sektör) */
+			reg = <0x00000000 0x00020000>; 
 		};
 
-		/* Slot 0 - Uygulama */
+		/* --- IMAGE 0 (Ana Uygulama) --- */
+		
+		/* Sektör 1: Slot 0 (Primary) - 128KB */
 		slot0_partition: partition@20000 {
-			label = "image-0";
-			reg = <0x00020000 0x00060000>; /* 384KB (3 Sektör) */
+			label = "mcuboot-primary";
+			reg = <0x00020000 0x00020000>; 
 		};
 
-		/* Slot 1 - Güncelleme (Dahili flasha sığdırmak için) */
-		/* H735G 1MB Flash'a sahiptir. Yer darlığı çekebilirsin.
-		   Eğer sığmıyorsa Slot1 harici flasha taşınmalı. 
-		   Şimdilik dahili örnek: */
-		slot1_partition: partition@80000 {
-			label = "image-1";
-			reg = <0x00080000 0x00060000>; /* 384KB (3 Sektör) */
-		};
+		/* Sektör 2: Slot 1 (Secondary) - 128KB */
+		slot1_partition: partition@40000 {
+			label = "mcuboot-secondary";
+			reg = <0x00040000 0x00020000>;
+		};	
 
-		/* Scratch - 128KB */
-		scratch_partition: partition@e0000 {
+		/* Sektör 5: Swap için gerekli alan (128KB) */
+		scratch_partition: partition@a0000 {
 			label = "image-scratch";
-			reg = <0x000e0000 0x00020000>; /* 128KB (1 Sektör) */
+			reg = <0x000a0000 0x00020000>;
 		};
 	};
 };
