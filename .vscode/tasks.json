@@ -19,7 +19,8 @@
             "command": "bash",
             "args": [
                 "-c",
-                "source ~/zephyrproject/.venv/bin/activate && source ~/.cargo/env && west flash -d ${config:app.build_dir}"
+                "source ~/zephyrproject/.venv/bin/activate && source ~/.cargo/env && west flash --runner stm32cubeprogrammer -- --extload /usr/local/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/ExternalLoader/MX25LM51245G_STM32H735G-DK.stldr -d ${config:app.build_dir}"
+                // west flash --hex-file build/zr_external_loader/zephyr/zephyr_signed_otfdec.hex -- --extload /usr/local/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/ExternalLoader/MX25LM51245G_STM32H735G-DK.stldr
             ],
             "problemMatcher": []
         },

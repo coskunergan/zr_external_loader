@@ -29,21 +29,40 @@
 	status = "okay";
 };
 
+&rcc {
+    clock-frequency = <DT_FREQ_M(64)>;
+    d1cpre = <1>;
+    hpre = <1>;     /* Prescaler'ları azalt */
+    d1ppre = <1>;
+    d2ppre1 = <2>;
+    d2ppre2 = <2>;
+    d3ppre = <2>;
+};
+
+&pll {
+    div-m = <5>;     /* 25MHz/5 = 5 MHz */
+    mul-n = <128>;   /* 5MHz * 128 = 640 MHz */
+    div-p = <10>;    /* 640/10 = 64 MHz (SYSCLK) */
+    div-q = <5>;
+    div-r = <5>;
+};
 
 &mx25lm51245 {
 	/delete-node/ partitions;
+	ospi-max-frequency = <50000000>;  // 50 MHz
+	data-rate = <1>;
 	status = "okay";	
 	partitions {
 		compatible = "fixed-partitions";
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		slot2_partition: partition@0 {
+		slot0_partition: partition@0 {
 			label = "mcuboot-primary-1";
 			reg = <0x00000000 0x00200000>;  // 2mb
 		};
 
-		slot3_partition: partition@200000 {
+		slot1_partition: partition@200000 {
 			label = "mcuboot-secondary-1";
 			reg = <0x00200000 0x00200000>;  // 2mb
 		};			
@@ -62,20 +81,6 @@
 			label = "mcuboot";
 			reg = <0x00000000 0x00020000>; 
 		};
-
-		/* --- IMAGE 0 (Ana Uygulama) --- */
-		
-		/* Sektör 1: Slot 0 (Primary) - 128KB */
-		slot0_partition: partition@20000 {
-			label = "mcuboot-primary";
-			reg = <0x00020000 0x00020000>; 
-		};
-
-		/* Sektör 2: Slot 1 (Secondary) - 128KB */
-		slot1_partition: partition@40000 {
-			label = "mcuboot-secondary";
-			reg = <0x00040000 0x00020000>;
-		};	
 
 		/* Sektör 5: Swap için gerekli alan (128KB) */
 		scratch_partition: partition@a0000 {
