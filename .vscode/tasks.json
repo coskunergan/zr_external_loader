@@ -19,7 +19,15 @@
             "command": "bash",
             "args": [
                 "-c",
-                "source ~/zephyrproject/.venv/bin/activate && source ~/.cargo/env && west flash --runner stm32cubeprogrammer -- --extload /usr/local/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/ExternalLoader/MX25LM51245G_STM32H735G-DK.stldr -d ${config:app.build_dir}"
+                "source ~/zephyrproject/.venv/bin/activate && \
+                source ~/.cargo/env && \
+                STM32_Programmer_CLI \
+                -c port=SWD reset=HWrst \
+                -w build/mcuboot/zephyr/zephyr.bin 0x08000000 \
+                -el /usr/local/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/ExternalLoader/MX25LM51245G_STM32H735G-DK.stldr \
+                -w build/zr_external_loader/zephyr/zephyr_signed_otfdec.bin 0x90000000 \
+                -rst"               
+                //west flash --runner stm32cubeprogrammer -- --extload /usr/local/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/ExternalLoader/MX25LM51245G_STM32H735G-DK.stldr -d ${config:app.build_dir}"
                 // west flash --hex-file build/zr_external_loader/zephyr/zephyr_signed_otfdec.hex -- --extload /usr/local/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/ExternalLoader/MX25LM51245G_STM32H735G-DK.stldr
             ],
             "problemMatcher": []

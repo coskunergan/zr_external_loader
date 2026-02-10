@@ -9,12 +9,11 @@ target_sources(app PRIVATE ${SRC_C_FILES})
 
 rust_cargo_application()
 
-
 # ==============================================================================
 # OTFDEC ENCRYPTION & SIGNING
 # ==============================================================================
 
-#set(RAW_SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts/delete_header.py")
+set(RAW_SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts/delete_header.py")
 set(SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts/encrypt_otfdec.py")
 set(KEY_FILE    "${CMAKE_CURRENT_SOURCE_DIR}/../../bootloader/mcuboot/root-rsa-2048.pem")
 

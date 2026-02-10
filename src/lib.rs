@@ -66,7 +66,7 @@ async fn led_task(spawner: Spawner) {
     let _ = uart_bridge::spawn_uart_bridge(spawner);
 
     loop {
-        let _ = Timer::after(Duration::from_millis(100)).await;
+        let _ = Timer::after(Duration::from_millis(20)).await;
         RED_LED_PIN.get().toggle();
         GREEN_LED_PIN.get().toggle();       
         //log::info!("Endless Loop!");

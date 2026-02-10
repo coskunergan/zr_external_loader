@@ -1,63 +1,83 @@
 import argparse
-import struct
 from Crypto.Cipher import AES
 
+def reverse_bytes_in_chunks(data):
+    """16-byte chunk'lar halinde ters çevir - her zaman 16'nın katı döner"""
+    result = bytearray()
+    for i in range(0, len(data), 16):
+        chunk = data[i:i+16]
+        if len(chunk) < 16:
+            # Son chunk 16'dan küçükse padding ekle
+            chunk = chunk + bytes(16 - len(chunk))
+        result.extend(chunk[::-1])
+    return bytes(result)
+
 def main():
-    parser = argparse.ArgumentParser(description='STM32H7 OTFDEC %100 Donanım Uyumlu Şifreleyici')
+    parser = argparse.ArgumentParser(description='STM32H7 OTFDEC - Windows Script Clone')
     parser.add_argument('input', help='Giriş dosyası (zephyr.bin)')
     parser.add_argument('output', help='Çıkış dosyası (zephyr_enc.bin)')
+    parser.add_argument('--key', default="210FEDCBA9876543210FEDCBA9876543", 
+                        help='Encryption key (hex)')
+    parser.add_argument('--iv', default="55555555111111110000A5A519000040",
+                        help='IV (hex)')
+    parser.add_argument('--skip-bytes', type=int, default=1024,
+                        help='Bytes to skip from input')
     args = parser.parse_args()
 
-    # --- AYARLAR ---
-    # C tarafındaki uint32_t key[4] = {W0, W1, W2, W3} sırası
-    KEY_WORDS = [0xA9876543, 0x210FEDCB, 0xA9876543, 0x210FEDCB]
-    NONCE_WORDS = [0x11111111, 0x55555555] # Nonce[0], Nonce[1]
-    VERSION = 0xA5A5
-    REGION_INDEX = 1     # OTFDEC_REGION2 = 1
-    APP_START_ADDR = 0x90000400 # Uygulamanın Flash'taki fiziksel adresi
+    KEY_HEX = args.key
+    IV_HEX = args.iv
+    SKIP_BYTES = args.skip_bytes
 
-    # 1. Anahtarı Hazırla (Full 16-byte Reversal)
-    # Donanım K0..K3'ü aynalanmış (Big-Endian) sırada AES çekirdeğine besler.
-    key_bytes = struct.pack('<IIII', *KEY_WORDS)
-    key_aes = key_bytes[::-1] 
+    print(f"[*] KEY: {KEY_HEX}")
+    print(f"[*] IV: {IV_HEX}")
+    print(f"[*] SKIP: {SKIP_BYTES} bytes")
     
-    cipher = AES.new(key_aes, AES.MODE_ECB)
-    ciphertext = bytearray()
+    # Key ve IV'yi bytes'a çevir
+    key = bytes.fromhex(KEY_HEX)
+    iv = bytes.fromhex(IV_HEX)
 
+    # Input dosyasını oku
     with open(args.input, 'rb') as f:
         data = f.read()
 
-    # Zephyr 1024 byte padding eklediyse temizle (veya direkt oku)
-    plaintext = data[1024:] if len(data) > 1024 else data
-
-    print(f"[*] OTFDEC Adres-Tabanlı Şifreleme: {hex(APP_START_ADDR)}")
-
-    for i in range(0, len(plaintext), 16):
-        block = plaintext[i:i+16]
-        if len(block) < 16: block = block.ljust(16, b'\x00')
-        
-        curr_addr = APP_START_ADDR + i
-        
-        # 2. IV (Counter) Oluşturma (AN5281 Sf. 5 ve RM0455)
-        # Yapı: [NonceL, NonceH, Version, Address|Region]
-        # Bu yapı AES çekirdeğine girerken de tamamen aynalanır (Full Reverse).
-        iv_le = struct.pack('<IIII', NONCE_WORDS[0], NONCE_WORDS[1], 
-                            (VERSION << 16), (curr_addr & 0xFFFFFFF0) | REGION_INDEX)
-        iv_aes = iv_le[::-1] 
-
-        # 3. Keystream Üret ve Aynala (Post-processing)
-        # Donanım, AES çekirdeğinden çıkan sonucu XOR'lamadan önce tekrar aynalar.
-        keystream_aes = cipher.encrypt(iv_aes)
-        ks_final = keystream_aes[::-1]
-
-        # 4. XOR İşlemi
-        for b, k in zip(block, ks_final):
-            ciphertext.append(b ^ k)
-
+    # MCUboot padding'i atla
+    plaintext = data[SKIP_BYTES:] if len(data) > SKIP_BYTES else data
+    original_length = len(plaintext)
+    
+    # 16'nın katına yuvarla (Windows reverse_byte_in_binary.py bunu yapıyor)
+    padded_length = ((original_length + 15) // 16) * 16
+    
+    print(f"[*] Plaintext: {original_length} bytes")
+    print(f"[*] Padded length: {padded_length} bytes ({padded_length - original_length} byte padding)")
+    
+    # STEP 1: Byte reversal (pre-processing)
+    print("[*] Step 1: Reversing bytes...")
+    plaintext_reversed = reverse_bytes_in_chunks(plaintext)
+    print(f"[*] After reverse: {len(plaintext_reversed)} bytes")
+    
+    # STEP 2: AES-CTR encryption
+    print("[*] Step 2: AES-CTR encryption...")
+    cipher = AES.new(key, AES.MODE_CTR, initial_value=iv, nonce=b'')
+    encrypted_reversed = cipher.encrypt(plaintext_reversed)
+    print(f"[*] After encryption: {len(encrypted_reversed)} bytes")
+    
+    # STEP 3: Byte reversal (post-processing)
+    print("[*] Step 3: Reversing encrypted bytes...")
+    encrypted_final = reverse_bytes_in_chunks(encrypted_reversed)
+    print(f"[*] After final reverse: {len(encrypted_final)} bytes")
+    
+    # Windows scripti PADDING DAHİL yazıyor (16'nın katı)
+    # Bizim reverse_bytes_in_chunks her zaman 16'nın katı döndürüyor
     with open(args.output, 'wb') as f:
-        f.write(ciphertext[:len(plaintext)])
+        f.write(encrypted_final)  # Tamamını yaz, kesme!
 
-    print(f"[!] Şifreleme AN5281 ve RM0455 standartlarına göre tamamlandı.")
+    import os
+    actual_size = os.path.getsize(args.output)
+    
+    print(f"[✓] Tamamlandı: {args.output}")
+    print(f"[✓] Original plaintext: {original_length} bytes")
+    print(f"[✓] Output file size: {actual_size} bytes")
+    print(f"[✓] Padding: {actual_size - original_length} bytes")
 
 if __name__ == '__main__':
     main()
